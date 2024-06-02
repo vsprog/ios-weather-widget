@@ -109,7 +109,7 @@ async function createWidget() {
 async function renderContentStack(widget) {
     const contentStack = widget.addStack();
     contentStack.layoutVertically();
-    contentStack.setPadding(14, 10, 10, 14);
+    contentStack.setPadding(14, 10, 10, 10);
 
     renderConditionsStack(contentStack);
     await renderTemperatureStack(contentStack);
