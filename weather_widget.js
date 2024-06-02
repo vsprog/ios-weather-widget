@@ -232,7 +232,7 @@ function parseWeatherData() {
     return {
         icon: currentCondition.icon,
         description: currentCondition.description.toUpperCase(),
-        temperature: `${weatherData.main.temp}°`,
+        temperature: `${Math.ceil(weatherData.main.temp)}°`,
         pressure: `${weatherData.main.pressure} hPa`,
         isAfternoon:  now > sunriseMs && now < sunsetMs,
         dusk: getStringTime(sunriseMs),
