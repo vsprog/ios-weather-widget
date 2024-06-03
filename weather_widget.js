@@ -249,28 +249,28 @@ function getDirection(azimuth) {
     
     switch(true) {
         case azimuth === 0: 
-            direction = 'n';
-            break;
-        case azimuth > 0 && azimuth < 90:
-            direction = 'ne';
-            break;
-        case azimuth === 90:
-            direction = 'e';
-            break;
-        case azimuth > 90 && azimuth < 180:
-            direction = 'se';
-            break;
-        case azimuth === 180:
             direction = 's';
             break;
-        case azimuth > 180 && azimuth < 270:
+        case azimuth > 0 && azimuth < 90:
             direction = 'sw';
             break;
-        case azimuth === 270:
+        case azimuth === 90:
             direction = 'w';
             break;
-        case azimuth > 270 && azimuth < 360:
+        case azimuth > 90 && azimuth < 180:
             direction = 'nw';
+            break;
+        case azimuth === 180:
+            direction = 'n';
+            break;
+        case azimuth > 180 && azimuth < 270:
+            direction = 'ne';
+            break;
+        case azimuth === 270:
+            direction = 'e';
+            break;
+        case azimuth > 270 && azimuth < 360:
+            direction = 'se';
             break;
     }
     
