@@ -279,7 +279,10 @@ function getDirection(azimuth) {
 
 function getStringTime(ms) {
     const date = new Date(ms);
-    return `${date.getHours()}:${date.getMinutes()}`;
+    const minutes = date.getMinutes();
+    const leadingZero = minutes < 10 ? '0' : '';
+ 
+    return `${date.getHours()}:${leadingZero}${minutes}`;
 }
 
 async function fetchWeatherData(){
