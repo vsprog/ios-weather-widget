@@ -145,7 +145,7 @@ async function renderTemperatureStack(contentStack) {
     let image = tempStack.addImage(imageData);
     image.imageSize = new Size(24, 24);
 
-    const currentTemp = tempStack.addText(temperature);
+    const currentTemp = tempStack.addText(`${temperature}°`);
     currentTemp.font = new Font('ModernDotDigital-7', 21);
     currentTemp.leftAlignText();
     currentTemp.textColor = new Color(getTemperatureColor(temperature));
@@ -235,7 +235,7 @@ function parseWeatherData() {
     return {
         icon: currentCondition.icon,
         description: currentCondition.description.toUpperCase(),
-        temperature: `${Math.ceil(weatherData.main.temp)}°`,
+        temperature: Math.ceil(weatherData.main.temp),
         pressure: `${weatherData.main.pressure} hPa`,
         isAfternoon:  now > sunriseMs && now < sunsetMs,
         dusk: getStringTime(sunriseMs),
