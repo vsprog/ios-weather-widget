@@ -93,9 +93,11 @@ async function createWidget() {
     gradient.colors = [
         new Color('171a21'),
         new Color('1b2838')
+        //new Color('0a000f'),
+        //new Color('1e002d') 
     ];
     widget.backgroundGradient = gradient;
-
+    //widget.backgroundColor = new Color('1b1b1b');
     widget.setPadding(0, 0, 0, 0);
 
     let nextRefresh = Date.now() + 1000 * 60 * 15; // each 15 minutes
@@ -144,9 +146,10 @@ async function renderTemperatureStack(contentStack) {
     image.imageSize = new Size(24, 24);
 
     const currentTemp = tempStack.addText(temperature);
-    currentTemp.font = new Font('ModernDotDigital-7', 18);
+    currentTemp.font = new Font('ModernDotDigital-7', 21);
     currentTemp.leftAlignText();
-    currentTemp.textColor = new Color('fff');
+    currentTemp.textColor = new Color(getTemperatureColor(temperature));
+    //currentTemp.textColor = new Color('FF5733');
 
     tempStack.addSpacer();
 }
@@ -245,36 +248,14 @@ function parseWeatherData() {
 }
 
 function getDirection(azimuth) {
-    let direction;
-    
-    switch(true) {
-        case azimuth === 0: 
-            direction = 's';
-            break;
-        case azimuth > 0 && azimuth < 90:
-            direction = 'sw';
-            break;
-        case azimuth === 90:
-            direction = 'w';
-            break;
-        case azimuth > 90 && azimuth < 180:
-            direction = 'nw';
-            break;
-        case azimuth === 180:
-            direction = 'n';
-            break;
-        case azimuth > 180 && azimuth < 270:
-            direction = 'ne';
-            break;
-        case azimuth === 270:
-            direction = 'e';
-            break;
-        case azimuth > 270 && azimuth < 360:
-            direction = 'se';
-            break;
-    }
-    
-    return direction;
+    if (azimuth === 0) return 's';
+    if (azimuth === 90) return 'w';
+    if (azimuth === 180) return 'n';
+    if (azimuth === 270) return 'e';
+    if (azimuth > 0 && azimuth < 90) return 'sw';
+    if (azimuth > 90 && azimuth < 180) return 'nw';
+    if (azimuth > 180 && azimuth < 270) return 'ne';
+    if (azimuth > 270 && azimuth < 360) return 'se';
 }
 
 function getStringTime(ms) {
@@ -285,8 +266,52 @@ function getStringTime(ms) {
     return `${date.getHours()}:${leadingZero}${minutes}`;
 }
 
+function getTemperatureColor(temp) {
+    const minTemp = -50;
+    const maxTemp = 50;
+    const clampedTemp = Math.max(minTemp, Math.min(maxTemp, temp));
+
+    const ratio = (clampedTemp - minTemp) / (maxTemp - minTemp);
+
+    // Hue (shade): от 280 (violet) до 0 (red)
+    const hue = 280 * (1 - ratio);
+
+    // Lightness
+    let lightness = 50;
+    if (ratio > 0.8) {
+        const heatRatio = (ratio - 0.8) / 0.2; 
+        lightness = 50 - (heatRatio * 15); 
+    }
+
+    // HSL to RGB
+    const s = 100 / 100;
+    const l = lightness / 100;
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs((hue / 60) % 2 - 1));
+    const m = l - c / 2;
+
+    let r = 0, g = 0, b = 0;
+
+    if (0 <= hue && hue < 60) { r = c; g = x; b = 0; }
+    else if (60 <= hue && hue < 120) { r = x; g = c; b = 0; }
+    else if (120 <= hue && hue < 180) { r = 0; g = c; b = x; }
+    else if (180 <= hue && hue < 240) { r = 0; g = x; b = c; }
+    else if (240 <= hue && hue < 300) { r = x; g = 0; b = c; }
+    else if (300 <= hue && hue <= 360) { r = c; g = 0; b = x; }
+
+    // Convert to a range 0-255
+    const rInt = Math.round((r + m) * 255);
+    const gInt = Math.round((g + m) * 255);
+    const bInt = Math.round((b + m) * 255);
+
+    // format to HEX
+    const toHex = (num) => num.toString(16).padStart(2, '0').toUpperCase();
+
+    return `${toHex(rInt)}${toHex(gInt)}${toHex(bInt)}`;
+}
+
 async function fetchWeatherData(){
-    let {latitude, longitude} = await Location.current();
+    let { latitude, longitude } = await Location.current();
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&APPID=${API_TOKEN}`;
     const req = new Request(url);
     
