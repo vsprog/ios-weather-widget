@@ -267,8 +267,8 @@ function getStringTime(ms) {
 }
 
 function getTemperatureColor(temp) {
-    const minTemp = -50;
-    const maxTemp = 50;
+    const minTemp = -40;
+    const maxTemp = 40;
     const clampedTemp = Math.max(minTemp, Math.min(maxTemp, temp));
 
     const ratio = (clampedTemp - minTemp) / (maxTemp - minTemp);
@@ -284,10 +284,12 @@ function getTemperatureColor(temp) {
     }
 
     // HSL to RGB
-    const s = 100 / 100;
+    const s = 1;
     const l = lightness / 100;
     const c = (1 - Math.abs(2 * l - 1)) * s;
-    const x = c * (1 - Math.abs((hue / 60) % 2 - 1));
+
+    const hPrime = hue / 60;
+    const x = c * (1 - Math.abs((hPrime % 2 + 2) % 2 - 1));
     const m = l - c / 2;
 
     let r = 0, g = 0, b = 0;
