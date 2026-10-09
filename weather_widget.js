@@ -267,49 +267,43 @@ function getStringTime(ms) {
 }
 
 function getTemperatureColor(temp) {
-    const minTemp = -40;
-    const maxTemp = 40;
-    const clampedTemp = Math.max(minTemp, Math.min(maxTemp, temp));
+    const clamped = Math.max(-40, Math.min(40, temp));
+    
+    let hue, saturation = 100, lightness = 50;
 
-    const ratio = (clampedTemp - minTemp) / (maxTemp - minTemp);
-
-    // Hue (shade): от 280 (violet) до 0 (red)
-    const hue = 280 * (1 - ratio);
-
-    // Lightness
-    let lightness = 50;
-    if (ratio > 0.8) {
-        const heatRatio = (ratio - 0.8) / 0.2; 
-        lightness = 50 - (heatRatio * 15); 
+    // cold
+    if (clamped < 0) {
+        const x = (clamped + 40) / 40; 
+        
+        // 240 (deep blue) до 190 (light-blue)
+        hue = 240 - x * 50; 
+        
+        // 30% (light-blue) to 100% (white)
+        lightness = 30 + x * 70; 
+    // warm
+    } else {
+        const x = clamped / 40; 
+        
+        //  60 (yellow) -> 30 (orange) -> 0 (red) -> -30/330 (dark red)
+        hue = 60 - x * 90; 
+        if (hue < 0) hue += 360;
+        
+        // 100% (white) до 50% (red) и до 25% (dark red)
+        lightness = 100 - x * 75;
     }
 
-    // HSL to RGB
-    const s = 1;
-    const l = lightness / 100;
-    const c = (1 - Math.abs(2 * l - 1)) * s;
+    return hslToHex(hue, saturation, lightness);
+}
 
-    const hPrime = hue / 60;
-    const x = c * (1 - Math.abs((hPrime % 2 + 2) % 2 - 1));
-    const m = l - c / 2;
-
-    let r = 0, g = 0, b = 0;
-
-    if (0 <= hue && hue < 60) { r = c; g = x; b = 0; }
-    else if (60 <= hue && hue < 120) { r = x; g = c; b = 0; }
-    else if (120 <= hue && hue < 180) { r = 0; g = c; b = x; }
-    else if (180 <= hue && hue < 240) { r = 0; g = x; b = c; }
-    else if (240 <= hue && hue < 300) { r = x; g = 0; b = c; }
-    else if (300 <= hue && hue <= 360) { r = c; g = 0; b = x; }
-
-    // Convert to a range 0-255
-    const rInt = Math.round((r + m) * 255);
-    const gInt = Math.round((g + m) * 255);
-    const bInt = Math.round((b + m) * 255);
-
-    // format to HEX
-    const toHex = (num) => num.toString(16).padStart(2, '0').toUpperCase();
-
-    return `${toHex(rInt)}${toHex(gInt)}${toHex(bInt)}`;
+function hslToHex(h, s, l) {
+    l /= 100;
+    const a = (s * Math.min(l, 1 - l)) / 100;
+    const f = (n) => {
+        const k = (n + h / 30) % 12;
+        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, '0').toUpperCase();
+    };
+    return `${f(0)}${f(8)}${f(4)}`;
 }
 
 async function fetchWeatherData(){
